@@ -5,5 +5,4 @@ public record EnviarEmailDTO(
         String email,
         String assuntoEmail,
         String mensagemEmail
-) {
-}
+) {}
