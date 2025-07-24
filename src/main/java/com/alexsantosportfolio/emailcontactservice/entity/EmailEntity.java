@@ -1,6 +1,8 @@
 package com.alexsantosportfolio.emailcontactservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,35 +15,39 @@ public class EmailEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "nomeEmail")
+    @NotBlank
+    @Column(name = "nome_email", nullable = false)
     private String nomeEmail;
 
-    @Column(name = "email")
+    @NotBlank
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "assuntoEmail")
+    @NotBlank
+    @Column(name = "assunto_email", nullable = false)
     private String assuntoEmail;
 
-    @Column(name = "mensagemEmail")
+    @NotBlank
+    @Column(name = "mensagem_email", nullable = false)
     private String mensagemEmail;
 
-    @Column(name = "dataEnvio")
+    @CreationTimestamp
+    @Column(name = "data_envio", nullable = false, updatable = false)
     private LocalDateTime dataEnvio;
 
-    @Column(name = "enviadoComSucesso")
+    @Column(name = "enviado_com_sucesso", nullable = false)
     private Boolean enviadoComSucesso = false;
 
-    @Column(name = "erroEnvio")
+    @Column(name = "erro_envio")
     private String erroEnvio;
 
-    @Column(name = "ipOrigem")
+    @Column(name = "ip_origem")
     private String ipOrigem;
 
     public EmailEntity() {
     }
 
-    public EmailEntity(UUID id, String nomeEmail, String email, String assuntoEmail, String mensagemEmail, LocalDateTime dataEnvio, Boolean enviadoComSucesso, String erroEnvio, String ipOrigem) {
-        this.id = id;
+    public EmailEntity(String nomeEmail, String email, String assuntoEmail, String mensagemEmail, LocalDateTime dataEnvio, Boolean enviadoComSucesso, String erroEnvio, String ipOrigem) {
         this.nomeEmail = nomeEmail;
         this.email = email;
         this.assuntoEmail = assuntoEmail;
