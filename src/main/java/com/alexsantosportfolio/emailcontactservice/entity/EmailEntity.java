@@ -47,12 +47,11 @@ public class EmailEntity {
     public EmailEntity() {
     }
 
-    public EmailEntity(String nomeEmail, String email, String assuntoEmail, String mensagemEmail, LocalDateTime dataEnvio, Boolean enviadoComSucesso, String erroEnvio, String ipOrigem) {
+    public EmailEntity(String nomeEmail, String email, String assuntoEmail, String mensagemEmail, Boolean enviadoComSucesso, String erroEnvio, String ipOrigem) {
         this.nomeEmail = nomeEmail;
         this.email = email;
         this.assuntoEmail = assuntoEmail;
         this.mensagemEmail = mensagemEmail;
-        this.dataEnvio = dataEnvio;
         this.enviadoComSucesso = enviadoComSucesso;
         this.erroEnvio = erroEnvio;
         this.ipOrigem = ipOrigem;
