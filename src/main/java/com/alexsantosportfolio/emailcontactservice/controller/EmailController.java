@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,12 +60,12 @@ public class EmailController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmailEntity> buscarEmailPorId(@PathVariable UUID id) {
+    public ResponseEntity<EmailEntity> buscarEmailPorId(@PathVariable @NonNull UUID id) {
         return ResponseEntity.ok(emailService.buscarEmailPorId(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarEmailPorId(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletarEmailPorId(@PathVariable @NonNull UUID id) {
         emailService.deletarEmailPorId(id);
 
         return ResponseEntity.noContent().build(); // 204

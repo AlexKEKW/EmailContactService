@@ -14,6 +14,4 @@ public interface EmailRepository extends JpaRepository<EmailEntity, UUID> {
 
     @Query("SELECT e FROM EmailEntity e WHERE e.assuntoEmail LIKE %:termo% OR e.mensagemEmail LIKE %:termo%")
     List<EmailEntity> listaEmailsPorConteudo(@Param("termo") String termo);
-
-
 }

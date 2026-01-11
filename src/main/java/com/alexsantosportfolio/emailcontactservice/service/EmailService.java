@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.lang.NonNull;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -85,12 +86,12 @@ public class EmailService {
         return emailRepository.listaEmailsPorConteudo(termo);
     }
 
-    public EmailEntity buscarEmailPorId(UUID id) {
+    public EmailEntity buscarEmailPorId(@NonNull UUID id) {
         return emailRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Email não encontrado"));
     }
 
-    public void deletarEmailPorId(UUID id) {
+    public void deletarEmailPorId(@NonNull UUID id) {
         try {
             emailRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
