@@ -1,16 +1,21 @@
 package com.alexsantosportfolio.emailcontactservice.service;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.lang.NonNull;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 
 import com.alexsantosportfolio.emailcontactservice.DTO.EnviarEmailDTO;
@@ -18,6 +23,9 @@ import com.alexsantosportfolio.emailcontactservice.config.EmailSendException;
 import com.alexsantosportfolio.emailcontactservice.config.ObterIpUsuario;
 import com.alexsantosportfolio.emailcontactservice.entity.EmailEntity;
 import com.alexsantosportfolio.emailcontactservice.repository.EmailRepository;
+
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 @Service
 public class EmailService {
@@ -29,9 +37,12 @@ public class EmailService {
 
     private final EmailRepository emailRepository;
 
-    public EmailService(EmailRepository emailRepository, JavaMailSender javaMailSender) {
+    private final EmailTemplateService emailTemplateService;
+
+    public EmailService(EmailRepository emailRepository, JavaMailSender javaMailSender, EmailTemplateService emailTemplateService) {
         this.javaMailSender = javaMailSender;
         this.emailRepository = emailRepository;
+        this.emailTemplateService = emailTemplateService;
     }
 
     public EmailEntity enviarEmail(EnviarEmailDTO emailDTO) {
@@ -47,21 +58,36 @@ public class EmailService {
         );
     
         try {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setFrom(emailDTO.email());
-            mailMessage.setTo(meuEmail);
-            mailMessage.setSubject(emailDTO.assuntoEmail());
-            mailMessage.setText(
-                    "Nome: " + emailDTO.nomeEmail() + "\n" +
-                    "E-mail: " + emailDTO.email() + "\n\n" +
-                    "Mensagem:\n" + emailDTO.mensagemEmail()
+
+            // 1️⃣ Criar contexto do Thymeleaf
+            Context context = new Context();
+            context.setVariable("nome", emailDTO.nomeEmail());
+            context.setVariable("email", emailDTO.email());
+            context.setVariable("assunto", emailDTO.assuntoEmail());
+            context.setVariable("mensagem", emailDTO.mensagemEmail());
+            context.setVariable("data", LocalDateTime.now());
+
+            // 2️⃣ Renderizar HTML
+            String html = emailTemplateService.processarTemplate("email-template-forms", context);
+
+            // 3️⃣ Criar email MIME
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
             );
-    
-            javaMailSender.send(mailMessage);
-    
+
+            helper.setFrom(emailDTO.email());
+            helper.setTo(meuEmail);
+            helper.setSubject(emailDTO.assuntoEmail());
+            helper.setText(html, true); // true = HTML
+
+            javaMailSender.send(mimeMessage);
+
             emailEntity.setEnviadoComSucesso(true);
     
-        } catch (MailException e) {
+        } catch (MailException | jakarta.mail.MessagingException e) {
     
             // salva no banco MESMO ASSIM
             emailEntity.setEnviadoComSucesso(false);
