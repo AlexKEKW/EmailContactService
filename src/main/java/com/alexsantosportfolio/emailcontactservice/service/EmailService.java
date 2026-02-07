@@ -2,9 +2,7 @@ package com.alexsantosportfolio.emailcontactservice.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +22,13 @@ import com.alexsantosportfolio.emailcontactservice.config.ObterIpUsuario;
 import com.alexsantosportfolio.emailcontactservice.entity.EmailEntity;
 import com.alexsantosportfolio.emailcontactservice.repository.EmailRepository;
 
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 @Service
 public class EmailService {
 
     @Value("${spring.mail.username}")
+    @NonNull
     private String meuEmail;
 
     private final JavaMailSender javaMailSender;
@@ -59,7 +57,7 @@ public class EmailService {
     
         try {
 
-            // 1️⃣ Criar contexto do Thymeleaf
+            // Cria contexto do Thymeleaf
             Context context = new Context();
             context.setVariable("nome", emailDTO.nomeEmail());
             context.setVariable("email", emailDTO.email());
@@ -67,10 +65,10 @@ public class EmailService {
             context.setVariable("mensagem", emailDTO.mensagemEmail());
             context.setVariable("data", LocalDateTime.now());
 
-            // 2️⃣ Renderizar HTML
+            // Renderizar HTML
             String html = emailTemplateService.processarTemplate("email-template-forms", context);
 
-            // 3️⃣ Criar email MIME
+            // Criar email MIME
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
                     mimeMessage,

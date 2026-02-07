@@ -1,7 +1,5 @@
 package com.alexsantosportfolio.emailcontactservice.service;
 
-import java.util.Map;
-
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.springframework.stereotype.Service;
