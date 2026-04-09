@@ -8,19 +8,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.alexsantosportfolio.emailcontactservice.dto.response.ErrorResponse;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
+@Hidden
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // 400 — Erro de validação (bean validation)
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
         String mensagem = e.getBindingResult()
                 .getFieldErrors()
@@ -37,6 +41,7 @@ public class GlobalExceptionHandler {
 
     // 404 — Recurso não encontrado
     @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException e) {
         logger.warn("Recurso não encontrado: {}", e.getMessage());
 
@@ -47,6 +52,7 @@ public class GlobalExceptionHandler {
 
     // 400 — erros de regra de negócio
     @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         logger.warn("Erro de argumento inválido: {}", e.getMessage());
 
@@ -57,6 +63,7 @@ public class GlobalExceptionHandler {
 
     // 502 — falha ao enviar email
     @ExceptionHandler(EmailSendException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ResponseEntity<ErrorResponse> handleEmailSendError(EmailSendException e) {
         logger.error("Falha ao enviar email", e);
 
@@ -67,6 +74,7 @@ public class GlobalExceptionHandler {
 
     // 500 — erros inesperados
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
         logger.error("Erro inesperado", e);
 
