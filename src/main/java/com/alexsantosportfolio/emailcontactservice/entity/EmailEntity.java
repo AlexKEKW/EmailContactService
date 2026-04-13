@@ -1,9 +1,12 @@
 package com.alexsantosportfolio.emailcontactservice.entity;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +15,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Entidade JPA que representa um registro de email de contato enviado
+ * através do formulário frontend.
+ *
+ * <p>Além dos campos fixos (nome, email, assunto, mensagem), suporta
+ * campos dinâmicos através de {@link #camposAdicionais}, armazenados
+ * como JSONB no PostgreSQL via mapeamento nativo do Hibernate 6.</p>
+ *
+ * @see org.hibernate.annotations.JdbcTypeCode
+ */
 @Entity
 @Table(name = "tb_emails")
 public class EmailEntity {
@@ -45,11 +58,23 @@ public class EmailEntity {
     @Column(name = "ip_origem")
     private String ipOrigem;
 
+    /**
+     * Campos extras enviados pelo formulário frontend que não possuem
+     * mapeamento fixo na entidade. Armazenados como JSONB no PostgreSQL,
+     * permitindo flexibilidade total nos formulários de contato.
+     *
+     * <p>Exemplo de conteúdo: {@code {"telefone": "11999999999", "empresa": "TechCorp"}}</p>
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "campos_adicionais", columnDefinition = "jsonb")
+    private Map<String, Object> camposAdicionais;
+
     public EmailEntity() {
     }
 
     public EmailEntity(String nomeEmail, String email, String assuntoEmail, String mensagemEmail,
-                       Boolean enviadoComSucesso, String erroEnvio, String ipOrigem) {
+                       Boolean enviadoComSucesso, String erroEnvio, String ipOrigem,
+                       Map<String, Object> camposAdicionais) {
         this.nomeEmail = nomeEmail;
         this.email = email;
         this.assuntoEmail = assuntoEmail;
@@ -57,6 +82,7 @@ public class EmailEntity {
         this.enviadoComSucesso = enviadoComSucesso;
         this.erroEnvio = erroEnvio;
         this.ipOrigem = ipOrigem;
+        this.camposAdicionais = camposAdicionais;
     }
 
     public UUID getId() {
@@ -129,5 +155,13 @@ public class EmailEntity {
 
     public void setIpOrigem(String ipOrigem) {
         this.ipOrigem = ipOrigem;
+    }
+
+    public Map<String, Object> getCamposAdicionais() {
+        return camposAdicionais;
+    }
+
+    public void setCamposAdicionais(Map<String, Object> camposAdicionais) {
+        this.camposAdicionais = camposAdicionais;
     }
 }

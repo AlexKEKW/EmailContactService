@@ -1,12 +1,22 @@
 package com.alexsantosportfolio.emailcontactservice.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import com.alexsantosportfolio.emailcontactservice.entity.EmailEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * DTO de resposta contendo os detalhes de um registro de email.
+ *
+ * <p>Utilizado nos endpoints de listagem e busca por ID. Expõe os
+ * campos fixos do email e os campos dinâmicos adicionais submetidos
+ * pelo formulário frontend.</p>
+ *
+ * @see EmailEntity
+ */
 @Schema(description = "Detalhes de um registro de email")
 public record EmailDetailResponse(
 
@@ -37,8 +47,18 @@ public record EmailDetailResponse(
 
         @Schema(description = "Indica se o email foi enviado com sucesso",
                 example = "true")
-        boolean enviadoComSucesso
+        boolean enviadoComSucesso,
+
+        @Schema(description = "Campos extras dinâmicos submetidos pelo formulário",
+                example = "{\"telefone\": \"11999999999\", \"empresa\": \"TechCorp\"}")
+        Map<String, Object> camposAdicionais
 ) {
+    /**
+     * Factory method que converte uma {@link EmailEntity} para este DTO de resposta.
+     *
+     * @param entity entidade JPA com os dados do email persistido
+     * @return instância de {@code EmailDetailResponse} pronta para serialização
+     */
     public static EmailDetailResponse from(EmailEntity entity) {
         return new EmailDetailResponse(
                 entity.getId(),
@@ -47,7 +67,8 @@ public record EmailDetailResponse(
                 entity.getAssuntoEmail(),
                 entity.getMensagemEmail(),
                 entity.getDataEnvio(),
-                entity.getEnviadoComSucesso()
+                entity.getEnviadoComSucesso(),
+                entity.getCamposAdicionais()
         );
     }
 }

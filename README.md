@@ -12,7 +12,8 @@ API REST para envio e gerenciamento de emails de contato, construída com Spring
 ## ✨ Funcionalidades
 
 - **Envio de email** via SMTP com template HTML responsivo (Thymeleaf)
-- **Persistência** de todos os emails enviados no banco de dados
+- **Campos dinâmicos** — aceita qualquer campo extra do formulário frontend (telefone, empresa, etc.) sem alterar o backend
+- **Persistência** de todos os emails enviados no banco de dados (campos extras em JSONB)
 - **Histórico** — listagem e busca de emails por ID
 - **Validação de dados** com Bean Validation (Jakarta)
 - **Tratamento global de exceções** com respostas padronizadas
@@ -135,6 +136,8 @@ Com a aplicação rodando, acesse:
 
 ### Exemplo — Enviar Email
 
+O endpoint aceita **campos dinâmicos** além dos obrigatórios. Qualquer propriedade extra no JSON será capturada automaticamente, persistida como JSONB e renderizada no template do email:
+
 ```bash
 curl -X POST http://localhost:8080/v1/contato \
   -H "Content-Type: application/json" \
@@ -142,9 +145,14 @@ curl -X POST http://localhost:8080/v1/contato \
     "nomeEmail": "João Silva",
     "email": "joao@email.com",
     "assuntoEmail": "Orçamento de projeto",
-    "mensagemEmail": "Olá, gostaria de saber mais sobre seus serviços."
+    "mensagemEmail": "Olá, gostaria de saber mais sobre seus serviços.",
+    "telefone": "(11) 99999-9999",
+    "empresa": "TechCorp",
+    "comoNosConheceu": "Google"
   }'
 ```
+
+> Os campos `telefone`, `empresa` e `comoNosConheceu` são dinâmicos — não precisam existir no backend. Envie quantos quiser (máx. 20 campos, 1000 caracteres por valor).
 
 **Resposta (201 Created):**
 
@@ -166,6 +174,7 @@ O schema é gerenciado automaticamente pelo **Flyway**. As migrations ficam em `
 |---|---|
 | `V1__create_emails_table.sql` | Criação da tabela `tb_emails` |
 | `V2__insert_emails.sql` | Dados de seed para desenvolvimento |
+| `V3__add_campos_adicionais.sql` | Adiciona coluna JSONB para campos dinâmicos |
 
 ### Tabela `tb_emails`
 
@@ -180,6 +189,7 @@ O schema é gerenciado automaticamente pelo **Flyway**. As migrations ficam em `
 | `enviado_com_sucesso` | `BOOLEAN` | Status do envio |
 | `erro_envio` | `VARCHAR(500)` | Mensagem de erro (se houver) |
 | `ip_origem` | `VARCHAR(45)` | IP do remetente |
+| `campos_adicionais` | `JSONB` | Campos extras dinâmicos do formulário |
 
 ---
 
@@ -208,11 +218,13 @@ Todas as configurações ficam em `application.properties` e são sobrescritas p
 - ✅ Validação de entrada em todos os endpoints
 - ✅ Tratamento global de exceções (sem stack traces expostos)
 - ✅ Captura de IP com suporte a X-Forwarded-For
+- ✅ Campos dinâmicos limitados (máx. 20 campos, 1000 chars/valor) para prevenção de abuso
 
 ---
 
 ## 📋 Roadmap
 
+- [x] Campos dinâmicos com JSONB (formulários flexíveis)
 - [ ] Testes unitários e de integração
 - [ ] Rate limiting para proteção contra spam
 - [ ] Paginação no endpoint de listagem

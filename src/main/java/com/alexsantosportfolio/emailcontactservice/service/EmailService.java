@@ -25,6 +25,13 @@ import com.alexsantosportfolio.emailcontactservice.util.IpResolver;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Serviço responsável pelo envio, persistência e consulta de emails de contato.
+ *
+ * <p>Processa requisições do formulário frontend, renderiza o template HTML
+ * via Thymeleaf (incluindo campos dinâmicos), envia via SMTP e persiste
+ * o registro completo no banco de dados.</p>
+ */
 @Service
 public class EmailService {
 
@@ -45,6 +52,22 @@ public class EmailService {
         this.emailTemplateService = emailTemplateService;
     }
 
+    /**
+     * Envia um email de contato a partir dos dados do formulário e persiste o registro.
+     *
+     * <p>O método realiza as seguintes etapas:</p>
+     * <ol>
+     *   <li>Cria a entidade com os campos fixos e dinâmicos do formulário</li>
+     *   <li>Monta o contexto Thymeleaf com todos os dados, incluindo {@code camposAdicionais}</li>
+     *   <li>Renderiza o template HTML com os campos dinâmicos iterados</li>
+     *   <li>Envia o email via SMTP</li>
+     *   <li>Persiste a entidade no banco de dados (mesmo em caso de falha no envio)</li>
+     * </ol>
+     *
+     * @param request DTO contendo os dados fixos e dinâmicos do formulário
+     * @return entidade persistida com o status do envio
+     * @throws EmailSendException se ocorrer falha no envio via SMTP
+     */
     @Transactional
     public EmailEntity enviarEmail(EnviarEmailRequest request) {
 
@@ -55,7 +78,8 @@ public class EmailService {
                 request.mensagemEmail(),
                 false,
                 null,
-                IpResolver.resolve()
+                IpResolver.resolve(),
+                request.camposAdicionais()
         );
 
         try {
@@ -66,6 +90,7 @@ public class EmailService {
             context.setVariable("assunto", request.assuntoEmail());
             context.setVariable("mensagem", request.mensagemEmail());
             context.setVariable("data", LocalDateTime.now());
+            context.setVariable("camposAdicionais", request.camposAdicionais());
 
             // Renderizar HTML
             String html = emailTemplateService.processarTemplate("email-template-forms", context);
@@ -103,22 +128,46 @@ public class EmailService {
         return emailRepository.save(emailEntity);
     }
 
+    /**
+     * Retorna todos os registros de email persistidos.
+     *
+     * @return lista de entidades de email
+     */
     @Transactional(readOnly = true)
     public List<EmailEntity> listaEmails() {
         return emailRepository.findAll();
     }
 
+    /**
+     * Busca emails cujo assunto ou mensagem contenham o termo informado.
+     *
+     * @param termo texto para busca parcial
+     * @return lista de entidades que correspondem ao filtro
+     */
     @Transactional(readOnly = true)
     public List<EmailEntity> listaEmailsPorConteudo(String termo) {
         return emailRepository.listaEmailsPorConteudo(termo);
     }
 
+    /**
+     * Busca um email específico pelo seu identificador UUID.
+     *
+     * @param id identificador único do registro
+     * @return entidade do email encontrado
+     * @throws EntityNotFoundException se nenhum email for encontrado com o ID informado
+     */
     @Transactional(readOnly = true)
     public EmailEntity buscarEmailPorId(@NonNull UUID id) {
         return emailRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Email não encontrado com id: " + id));
     }
 
+    /**
+     * Remove permanentemente um registro de email do banco de dados.
+     *
+     * @param id identificador único do registro a ser deletado
+     * @throws EntityNotFoundException se nenhum email for encontrado com o ID informado
+     */
     @Transactional
     public void deletarEmailPorId(@NonNull UUID id) {
         if (!emailRepository.existsById(id)) {
