@@ -3,6 +3,7 @@ package com.alexsantosportfolio.emailcontactservice.service;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -89,8 +90,12 @@ public class EmailService {
             context.setVariable("email", request.email());
             context.setVariable("assunto", request.assuntoEmail());
             context.setVariable("mensagem", request.mensagemEmail());
+            // Usa utilitário para formatar as chaves (camelCase -> Title Case) esteticamente para a View
+            Map<String, Object> camposFormatados = com.alexsantosportfolio.emailcontactservice.util.StringFormatUtil
+                    .formatarChavesCamelCaseParaHeader(request.camposAdicionais());
+
             context.setVariable("data", LocalDateTime.now());
-            context.setVariable("camposAdicionais", request.camposAdicionais());
+            context.setVariable("camposAdicionais", camposFormatados);
 
             // Renderizar HTML
             String html = emailTemplateService.processarTemplate("email-template-forms", context);
