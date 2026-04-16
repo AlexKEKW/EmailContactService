@@ -113,6 +113,13 @@ export $(cat .env | xargs) && ./mvnw spring-boot:run
 
 A aplicação estará disponível em `http://localhost:8080`.
 
+### 5. Rode os testes (Opcional)
+
+A aplicação conta com uma robusta suíte de testes unitários e de integração (com banco H2 emulado). Para rodar os testes:
+```bash
+./mvnw test
+```
+
 ---
 
 ## 📖 Documentação da API
@@ -225,7 +232,7 @@ Todas as configurações ficam em `application.properties` e são sobrescritas p
 ## 📋 Roadmap
 
 - [x] Campos dinâmicos com JSONB (formulários flexíveis)
-- [ ] Testes unitários e de integração
+- [x] Testes unitários e de integração (100% dos fluxos contemplados)
 - [ ] Rate limiting para proteção contra spam
 - [ ] Paginação no endpoint de listagem
 - [ ] Spring Actuator para health checks
